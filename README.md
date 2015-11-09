@@ -5,9 +5,9 @@
 Simply to compare the code between frameworks/tools!
 
 The files that contain the interesting code:
-- [this version using Javascript + React](https://github.com/magopian/bmi-calculator-polyglot/blob/master/react/src/App.js)
-- [the version using ClojureScript + Reagent](https://github.com/magopian/bmi-calculator-polyglot/blob/master/reagent/src/cljs/bmi_reagent/app.cljs)
-- [the version using Javascript + CycleJS](https://github.com/magopian/bmi-calculator-polyglot/blob/master/cyclejs/scripts.es6/index.js)
+- [Javascript + React](https://github.com/magopian/bmi-calculator-polyglot/blob/master/react/src/App.js)
+- [ClojureScript + Reagent](https://github.com/magopian/bmi-calculator-polyglot/blob/master/reagent/src/cljs/bmi_reagent/app.cljs)
+- [Javascript + CycleJS](https://github.com/magopian/bmi-calculator-polyglot/blob/master/cyclejs/scripts.es6/index.js)
 
 
 ## What
