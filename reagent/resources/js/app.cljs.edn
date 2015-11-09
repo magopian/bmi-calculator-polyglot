@@ -1,0 +1,2 @@
+{:require  [bmi-reagent.app]
+ :init-fns [bmi-reagent.app/init]}
