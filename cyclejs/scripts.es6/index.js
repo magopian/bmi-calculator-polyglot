@@ -8,14 +8,10 @@ function renderSlider(param, value, min, max) {
             style: "width: 100%"});
 }
 
-function timestamp(value) {
-  return {val: value, timestamp: new Date()};
-}
-
 function calculateBMI(height, weightWithTimestamp, bmiWithTimestamp) {
   let heightMeters = height * 0.01;
-  let {val: bmi, timestamp: bmiTimestamp} = bmiWithTimestamp;
-  let {val: weight, timestamp: weightTimestamp} = weightWithTimestamp;
+  let {value: bmi, timestamp: bmiTimestamp} = bmiWithTimestamp;
+  let {value: weight, timestamp: weightTimestamp} = weightWithTimestamp;
   if (bmiTimestamp > weightTimestamp) {
     weight = Math.round(bmi * heightMeters * heightMeters);
   } else {
@@ -48,17 +44,19 @@ function intent(DOM) { // Interpret DOM events as user’s intended actions.
     changeWeight$: DOM.select('#weight').events('input')
       // We need to timestamp the weight and bmi to know which is the one that
       // is being changed (and so the other one needs to be computed from it).
-      .map(ev => timestamp(ev.target.value)),
+      .map(ev => ev.target.value)
+      .timestamp(),
     changeBMI$: DOM.select('#bmi').events('input')
-      .map(ev => timestamp(ev.target.value))
+      .map(ev => ev.target.value)
+      .timestamp()
   };
 }
 
 function model(actions) { // Manage state.
   return Rx.Observable.combineLatest(
     actions.changeHeight$.startWith(180),
-    actions.changeWeight$.startWith(timestamp(80)),
-    actions.changeBMI$.startWith(timestamp(0)),
+    actions.changeWeight$.startWith({value: 80, timestamp: 0}),
+    actions.changeBMI$.startWith({value: 0, timestamp: 0}),
     calculateBMI
   );
 }
