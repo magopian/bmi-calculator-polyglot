@@ -51,7 +51,7 @@ update msg model =
 
         SetWeight w ->
             { model | weight = w }
-            
+
         SetBMI bmi ->
             { model | weight = calcWeightFromBMI model.height bmi }
 
@@ -94,11 +94,13 @@ cmToM height =
 calcBMI : Int -> Int -> Float
 calcBMI height weight =
     toFloat weight / (cmToM height) ^ 2
-    
-    
+
+
 calcWeightFromBMI : Int -> Float -> Int
 calcWeightFromBMI height bmi =
-    bmi / (cmToM height) ^ 2
+    bmi
+        * (cmToM height)
+        ^ 2
         |> floor
 
 
@@ -114,26 +116,14 @@ getColorDiagnostic bmi =
         ( "red", "obese" )
 
 
-chainResult : Decoder a -> (a -> Result String b) -> Decoder b
-chainResult decoder fn =
-    decoder `Decode.andThen`
-        \v ->
-            case fn v of
-                Ok v' ->
-                    Decode.succeed v'
-                    
-                Err e ->
-                    Decode.fail e
-
-
 intValDecoder : Decoder Int
 intValDecoder =
-    chainResult targetValue String.toInt
-    
-    
+    Decode.customDecoder targetValue String.toInt
+
+
 floatValDecoder : Decoder Float
 floatValDecoder =
-    chainResult targetValue String.toFloat
+    Decode.customDecoder targetValue String.toFloat
 
 
 slider : (a -> Msg) -> Decoder a -> a -> a -> a -> Html Msg
