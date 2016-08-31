@@ -114,13 +114,13 @@ getColorDiagnostic bmi =
         ( "red", "obese" )
 
 
-chainResult : Decoder a -> (a -> Result e b) -> Decoder b
+chainResult : Decoder a -> (a -> Result String b) -> Decoder b
 chainResult decoder fn =
     decoder `Decode.andThen`
         \v ->
-            case fn of
+            case fn v of
                 Ok v' ->
-                    Decode.succeed v
+                    Decode.succeed v'
                     
                 Err e ->
                     Decode.fail e
@@ -131,7 +131,7 @@ intValDecoder =
     chainResult targetValue String.toInt
     
     
-floatValDecoder : Decoder Int
+floatValDecoder : Decoder Float
 floatValDecoder =
     chainResult targetValue String.toFloat
 
