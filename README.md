@@ -8,6 +8,7 @@ The files that contain the interesting code:
 - [Javascript + React](https://github.com/magopian/bmi-calculator-polyglot/blob/master/react/src/App.js)
 - [ClojureScript + Reagent](https://github.com/magopian/bmi-calculator-polyglot/blob/master/reagent/src/cljs/bmi_reagent/app.cljs)
 - [Javascript + CycleJS](https://github.com/magopian/bmi-calculator-polyglot/blob/master/cyclejs/scripts.es6/index.js)
+- [Elm](https://github.com/magopian/bmi-calculator-polyglot/blob/master/elm/BMI.elm)
 
 
 ## What
