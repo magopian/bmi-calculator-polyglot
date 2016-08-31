@@ -6,7 +6,7 @@ import Html.Attributes as Attr
 import Html.Attributes exposing (type', value, style)
 import Html.Events exposing (on, targetValue)
 import Json.Decode as Decode
-import Json.Decode exposing ((:=))
+import Json.Decode exposing (Decoder)
 import String
 
 
@@ -40,6 +40,7 @@ init =
 type Msg
     = SetWeight Int
     | SetHeight Int
+    | SetBMI Float
 
 
 update : Msg -> Model -> Model
@@ -50,6 +51,9 @@ update msg model =
 
         SetWeight w ->
             { model | weight = w }
+            
+        SetBMI bmi ->
+            { model | weight = calcWeightFromBMI model.height bmi }
 
 
 
@@ -68,27 +72,34 @@ view { height, weight } =
         div []
             [ div []
                 [ text <| "Height: " ++ toString height ++ "cm"
-                , intSlider SetHeight height 100 220
+                , slider SetHeight intValDecoder height 100 220
                 ]
             , div []
                 [ text <| "Weight: " ++ toString weight ++ "kg"
-                , intSlider SetWeight weight 30 150
+                , slider SetWeight intValDecoder weight 30 150
                 ]
             , div []
                 [ text <| "BMI: " ++ toString (floor bmi) ++ " "
                 , span [ style [ ( "color", color ) ] ] [ text diagnostic ]
-                , readonlySlider bmi 10 50
+                , slider SetBMI floatValDecoder bmi 10 50
                 ]
             ]
 
 
+cmToM : Int -> Float
+cmToM height =
+    toFloat height / 100
+
+
 calcBMI : Int -> Int -> Float
 calcBMI height weight =
-    let
-        heightInM =
-            toFloat height / 100
-    in
-        toFloat weight / heightInM ^ 2
+    toFloat weight / (cmToM height) ^ 2
+    
+    
+calcWeightFromBMI : Int -> Float -> Int
+calcWeightFromBMI height bmi =
+    bmi / (cmToM height) ^ 2
+        |> floor
 
 
 getColorDiagnostic : Float -> ( String, String )
@@ -103,39 +114,35 @@ getColorDiagnostic bmi =
         ( "red", "obese" )
 
 
-sliderAttrs : number -> number -> number -> List (Attribute Msg)
-sliderAttrs val minVal maxVal =
-    [ type' "range"
-    , value (toString val)
-    , Attr.min (toString minVal)
-    , Attr.max (toString maxVal)
-    ]
+chainResult : Decoder a -> (a -> Result e b) -> Decoder b
+chainResult decoder fn =
+    decoder `Decode.andThen`
+        \v ->
+            case fn of
+                Ok v' ->
+                    Decode.succeed v
+                    
+                Err e ->
+                    Decode.fail e
 
 
-intValueDecoder : Decode.Decoder Int
-intValueDecoder =
-    targetValue
-        `Decode.andThen`
-            \s ->
-                case String.toInt s of
-                    Ok i ->
-                        Decode.succeed i
-
-                    Err e ->
-                        Decode.fail e
+intValDecoder : Decoder Int
+intValDecoder =
+    chainResult targetValue String.toInt
+    
+    
+floatValDecoder : Decoder Int
+floatValDecoder =
+    chainResult targetValue String.toFloat
 
 
-intSlider : (Int -> Msg) -> Int -> Int -> Int -> Html Msg
-intSlider mkMsg val minVal maxVal =
+slider : (a -> Msg) -> Decoder a -> a -> a -> a -> Html Msg
+slider mkMsg decoder val minVal maxVal =
     input
-        (sliderAttrs val minVal maxVal
-            ++ [ on "change" (Decode.map mkMsg intValueDecoder) ]
-        )
-        []
-
-
-readonlySlider : number -> number -> number -> Html Msg
-readonlySlider val minVal maxVal =
-    input
-        (sliderAttrs val minVal maxVal ++ [ Attr.readonly True ])
+        [ type' "range"
+        , value (toString val)
+        , Attr.min (toString minVal)
+        , Attr.max (toString maxVal)
+        , on "change" (Decode.map mkMsg decoder)
+        ]
         []
