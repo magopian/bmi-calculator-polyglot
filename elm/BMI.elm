@@ -72,16 +72,16 @@ view { height, weight } =
         div []
             [ div []
                 [ text <| "Height: " ++ toString height ++ "cm"
-                , slider SetHeight intValDecoder height 100 220
+                , slider SetHeight (valDecoder String.toInt) height 100 220
                 ]
             , div []
                 [ text <| "Weight: " ++ toString weight ++ "kg"
-                , slider SetWeight intValDecoder weight 30 150
+                , slider SetWeight (valDecoder String.toInt) weight 30 150
                 ]
             , div []
                 [ text <| "BMI: " ++ toString (floor bmi) ++ " "
                 , span [ style [ ( "color", color ) ] ] [ text diagnostic ]
-                , slider SetBMI floatValDecoder bmi 10 50
+                , slider SetBMI (valDecoder String.toFloat) bmi 10 50
                 ]
             ]
 
@@ -98,10 +98,7 @@ calcBMI height weight =
 
 calcWeightFromBMI : Int -> Float -> Int
 calcWeightFromBMI height bmi =
-    bmi
-        * (cmToM height)
-        ^ 2
-        |> floor
+    round (bmi * (cmToM height) ^ 2)
 
 
 getColorDiagnostic : Float -> ( String, String )
@@ -116,20 +113,16 @@ getColorDiagnostic bmi =
         ( "red", "obese" )
 
 
-intValDecoder : Decoder Int
-intValDecoder =
-    Decode.customDecoder targetValue String.toInt
-
-
-floatValDecoder : Decoder Float
-floatValDecoder =
-    Decode.customDecoder targetValue String.toFloat
+valDecoder : (String -> Result String a) -> Decoder a
+valDecoder mkResult =
+    Decode.customDecoder targetValue mkResult
 
 
 slider : (a -> Msg) -> Decoder a -> a -> a -> a -> Html Msg
 slider mkMsg decoder val minVal maxVal =
     input
         [ type' "range"
+        , style [("width", "100%")]
         , value (toString val)
         , Attr.min (toString minVal)
         , Attr.max (toString maxVal)
