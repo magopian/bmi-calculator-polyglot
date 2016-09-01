@@ -126,6 +126,6 @@ slider mkMsg decoder val minVal maxVal =
         , value (toString val)
         , Attr.min (toString minVal)
         , Attr.max (toString maxVal)
-        , on "change" (Decode.map mkMsg decoder)
+        , on "input" (Decode.map mkMsg decoder)
         ]
         []
